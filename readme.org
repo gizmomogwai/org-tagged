@@ -1,0 +1,6 @@
+* Tagged dynamic block for org-mode
+[[https://melpa.org/#/org-tagged][https://melpa.org/packages/org-tagged-badge.svg]]
+[[https://stable.melpa.org/#/org-tagged][https://stable.melpa.org/packages/org-tagged-badge.svg]]
+
+Create a quick overview table over some tagged todos of your
+org-files.
