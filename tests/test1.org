@@ -1,0 +1,15 @@
+* TODO todo1_1                                                         :tag1:
+* TODO todo2_2                                                         :tag2:
+* DONE todo3_2                                                         :tag2:
+* DONE todo4_1                                                         :tag1:
+* TODO todo5_3                                                         :tag3:
+* DONE todo6_3                                                         :tag3:
+
+#+BEGIN: tagged :tags "tag1|tag2"
+| tag1    | tag2    |
+|---------+---------|
+| todo1_1 |         |
+|         | todo2_2 |
+|         | todo3_2 |
+| todo4_1 |         |
+#+END:
