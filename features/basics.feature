@@ -7,12 +7,10 @@ Feature: Basics
   Scenario: Basic table
     Then I should see:
       """
-      #+BEGIN: tagged :tags "tag1|tag2"
-      | tag1    | tag2    |
-      |---------+---------|
-      | todo1_1 |         |
-      |         | todo2_2 |
-      |         | todo3_2 |
-      | todo4_1 |         |
+      #+BEGIN: tagged :tags "tag1|tag2|tag3" :match "kanban"
+      | tag1    | tag2    | tag3 |
+      |---------+---------+------|
+      | todo1_1 | todo1_1 |      |
+      |         | todo2_2 |      |
       #+END:
       """

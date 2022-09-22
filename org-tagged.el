@@ -27,23 +27,15 @@
   "Map one todoitem to the needed information.
 Return a list with
 - the heading
-- the tag."
+- the tags as list of strings."
   (list
     (nth 4 (org-heading-components))
-    (s-chop-right 1 (s-chop-left 1 (nth 5  (org-heading-components))))))
+    (remove "" (s-split ":" (nth 5 (org-heading-components))))))
 
-(defun org-tagged//row-for (todo tags)
-  "TODO is a list of heading and tag (only one tag allowed).
-TAGS are all tags interesting for the table."
-  (let*
-    (
-      (heading (nth 0 todo))
-      (tag (nth 1 todo))
-      (index (-elem-index tag tags))
-      (prefix (s-repeat (1+ index) "|"))
-      (suffix (s-repeat (- (length tags) index) "|"))
-      )
-    (format "%s%s%s" prefix heading suffix)))
+(defun org-tagged//row-for (heading item-tags tags)
+  "Create a row for a HEADING and its ITEM-TAGS for a table with TAGS."
+  (format "|%s|" (s-join "|" (-map (lambda (tag)
+                      (if (-elem-index tag item-tags) heading "")) tags))))
 
 (defun org-tagged/version ()
   "Print org-tagge version."
@@ -58,9 +50,9 @@ PARAMS must contain: `:tags`."
     (let*
       (
         (tags (s-split "|" (plist-get params :tags)))
-        (table-title (s-join "|" tags))
-        (todos (org-map-entries 'org-tagged//map table-title))
-        (row-for (lambda (todo) (org-tagged//row-for todo tags)))
+        (table-title (plist-get params :tags))
+        (todos (org-map-entries 'org-tagged//map (plist-get params :match)))
+        (row-for (lambda (todo) (org-tagged//row-for (nth 0 todo) (nth 1 todo) tags)))
         (table (s-join "\n" (-map row-for todos)))
         )
       (format "|%s|\n|--|\n%s" table-title table)))
