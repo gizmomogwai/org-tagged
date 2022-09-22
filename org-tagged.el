@@ -12,7 +12,7 @@
 ;;; Commentary:
 ;; To create a tagged table for an org file, simply put the dynamic block
 ;; `
-;; #+BEGIN: tagged :tags "tag1|tag2"
+;; #+BEGIN: tagged :tags "tag1|tag2" :match "kanban"
 ;; #+END:
 ;; '
 ;; somewhere and run `C-c C-c' on it.
@@ -23,8 +23,8 @@
 (require 'org)
 (require 'org-table)
 
-(defun org-tagged--map ()
-  "Map one todoitem to the needed information.
+(defun org-tagged--get-data-from-heading ()
+  "Extract the needed information from a heading.
 Return a list with
 - the heading
 - the tags as list of strings."
@@ -51,7 +51,7 @@ PARAMS must contain: `:tags`."
       (
         (tags (s-split "|" (plist-get params :tags)))
         (table-title (plist-get params :tags))
-        (todos (org-map-entries 'org-tagged--map (plist-get params :match)))
+        (todos (org-map-entries 'org-tagged--get-data-form-heading (plist-get params :match)))
         (row-for (lambda (todo) (org-tagged--row-for (nth 0 todo) (nth 1 todo) tags)))
         (table (s-join "\n" (-map row-for todos))))
       (format "|%s|\n|--|\n%s" table-title table)))
