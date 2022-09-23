@@ -31,7 +31,7 @@ task :test => [:prepare] do
     puts "Testing version #{cask_version}"
   end
 
-  sh "podman run --rm -it -v$(pwd)/features:/root/features -v$(pwd)/tests:/root/tests #{image_tag} exec ecukes --verbose --debug --reporter magnars"
+  sh "podman run --rm -it #{image_tag} exec ecukes --verbose --debug --reporter magnars"
 end
 
 task :default => :test

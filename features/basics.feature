@@ -1,16 +1,16 @@
 Feature: Basics
   Background:
-    Given I open file "tests/test1.org"
+    Given I open file "features/data/test1.org"
     When I place the cursor before "BEGIN: tagged"
     And I press "C-c C-c"
 
   Scenario: Basic table
     Then I should see:
       """
-      #+BEGIN: tagged :tags "tag1|tag2|tag3" :match "kanban"
-      | tag1    | tag2    | tag3 |
-      |---------+---------+------|
-      | todo1_1 | todo1_1 |      |
-      |         | todo2_2 |      |
+      #+BEGIN: tagged :columns "%9tag1(Col1)|%5tag1|tag1(Col1)|%5tag2" :match "kanban"
+      |      Col1 |  tag1 |                 Col1 | tag2  |
+      |-----------+-------+----------------------+-------|
+      | 123456... | 12... | 12345678901234567890 | 12... |
+      |           |       |                      | to... |
       #+END:
       """

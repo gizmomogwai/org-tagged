@@ -2,7 +2,7 @@
 (source melpa)
 (source "org" "http://orgmode.org/elpa/")
 
-(package "org-tagged" "0.0.1" "Table with tagged todos for org-mode.")
+(package "org-tagged" "0.0.3" "Table with tagged todos for org-mode.")
 (package-file "org-tagged.el")
 
 (depends-on "dash")

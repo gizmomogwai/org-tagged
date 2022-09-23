@@ -1,0 +1,6 @@
+(:name org-tagged
+       :description "Tagged dynamic block for org-mode."
+       :type github
+       :pkgname "gizmomogwai/org-tagged"
+       :features org-tagged
+       :depends org-mode dash s)

@@ -8,4 +8,5 @@ COPY org-tagged.el /root/
 ENV PATH=/root/.cask/bin:$PATH
 RUN cask
 ENTRYPOINT ["cask"]
+COPY features /root/features/
 CMD ["emacs"]

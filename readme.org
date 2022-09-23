@@ -5,16 +5,22 @@
 Create a quick overview table over some tagged todos of your
 org-files.
 
-* Installation
+** Installation
 
-To use this program, locate the files 
+To use this program, locate the files
 org-tagged.el and rakefile.rb to load-path directory, and add the following code to your .emacs.
 
 (require 'org-tagged)
 
-* Usage
+** Usage
 
 Create and update (C-c C-c) a block like:
+#+BEGIN_SRC
 #+BEGIN: tagged :tags "tag1|tag2|tag3" :match "kanban"
-
 #+END:
+#+END_SRC
+
+** Development
+You can easily run this package locally. Commits should be checked
+with =rake test= which in turn pulls up a container with the default
+environment.
