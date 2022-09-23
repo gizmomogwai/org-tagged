@@ -4,3 +4,11 @@
 
 Create a quick overview table over some tagged todos of your
 org-files.
+
+
+* Usage
+
+Create and update (C-c C-c) a block like:
+#+BEGIN: tagged :tags "tag1|tag2|tag3" :match "kanban"
+
+#+END:
