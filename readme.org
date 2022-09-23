@@ -4,3 +4,9 @@
 
 Create a quick overview table over some tagged todos of your
 org-files.
+
+* Installation
+
+To use this program, locate this file to load-path directory, and add the following code to your .emacs.
+
+(require 'org-tagged)
