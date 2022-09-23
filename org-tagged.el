@@ -52,16 +52,18 @@ Each column description consists of:
 - maximum length (defaults to 1000)
 - tag to select the elements that go into the column
 - title of the column (defaults to the tag)"
-  (string-match (rx
-                  string-start
-                  (optional (and "%" (group (one-or-more digit))))
-                  (group (minimal-match (1+ anything)))
-                  (optional (and "(" (group (+? anything)) ")"))
-                  string-end) column-description)
+  (string-match
+    (rx
+      string-start
+      (optional (and "%" (group (one-or-more digit))))
+      (group (minimal-match (1+ anything)))
+      (optional (and "(" (group (+? anything)) ")"))
+      string-end)
+    column-description)
   (list
     (string-to-number (or (match-string 1 column-description) "1000"))
     (match-string 2 column-description)
-    (match-string 3 column-description)))
+    (or (match-string 3 column-description) (match-string 2 column-description))))
 
 ;(org-tagged--parse-column "%25tag1(Column1)")
 ;(org-tagged--parse-column "tag1(ttt)")
@@ -88,7 +90,7 @@ PARAMS must contain: `:tags`."
           (org-map-entries 'org-tagged--get-data-from-heading (plist-get params :match)))
         (table
           (s-join "\n" (--map (org-tagged--row-for (nth 0 it) (nth 1 it) columns) todos))))
-      (format "|%s|\n|--|\n%s" (s-join "|" (--map (or (nth 2 it) (nth 1 it)) columns)) table)))
+      (format "|%s|\n|--|\n%s" (s-join "|" (--map (nth 2 it) columns)) table)))
   (org-table-align))
 (provide 'org-tagged)
 ;;; org-tagged.el ends here
