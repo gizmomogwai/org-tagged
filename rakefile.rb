@@ -34,4 +34,9 @@ task :test => [:prepare] do
   sh "podman run --rm -it #{image_tag} exec ecukes --verbose --debug --reporter magnars"
 end
 
+desc "Push to github"
+task :push => [:test] do
+  sh "git push origin main"
+end
+
 task :default => :test
