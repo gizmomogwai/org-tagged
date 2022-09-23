@@ -11,3 +11,10 @@ To use this program, locate the files
 org-tagged.el and rakefile.rb to load-path directory, and add the following code to your .emacs.
 
 (require 'org-tagged)
+
+* Usage
+
+Create and update (C-c C-c) a block like:
+#+BEGIN: tagged :tags "tag1|tag2|tag3" :match "kanban"
+
+#+END:
