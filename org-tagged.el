@@ -34,12 +34,13 @@ Return a list with
 
 (defun org-tagged--row-for (heading item-tags columns)
   "Create a row for a HEADING and its ITEM-TAGS for a table with COLUMNS."
-  (format "|%s|" (s-join "|"
+  (let ((result  (format "|%s|" (s-join "|"
     (--map
       (if (-elem-index (nth 1 it) item-tags)
         (s-truncate (nth 0 it) heading)
         "")
-      columns))))
+      columns)))))
+    (if (eq (length result) (1+ (length columns))) nil result)))
 
 (defun org-tagged-version ()
   "Print org-tagge version."
@@ -89,7 +90,7 @@ PARAMS must contain: `:tags`."
         (todos
           (org-map-entries 'org-tagged--get-data-from-heading (plist-get params :match)))
         (table
-          (s-join "\n" (--map (org-tagged--row-for (nth 0 it) (nth 1 it) columns) todos))))
+          (s-join "\n" (remove nil (--map (org-tagged--row-for (nth 0 it) (nth 1 it) columns) todos)))))
       (format "|%s|\n|--|\n%s" (s-join "|" (--map (nth 2 it) columns)) table)))
   (org-table-align))
 (provide 'org-tagged)

@@ -4,6 +4,6 @@
 * DONE todo4_1                                                         :tag1:
 * TODO todo5_3                                                         :tag3:
 * DONE todo6_3                                                         :tag3:
-
+* TODO should not produce a row
 #+BEGIN: tagged :columns "%9tag1(Col1)|%5tag1|tag1(Col1)|%5tag2" :match "kanban"
 #+END:
