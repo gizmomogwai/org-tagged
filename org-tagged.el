@@ -32,12 +32,14 @@ Return a list with
     (nth 4 (org-heading-components))
     (remove "" (s-split ":" (or (nth 5 (org-heading-components)) "")))))
 
-(defun org-tagged--row-for (heading item-tags columns)
-  "Create a row for a HEADING and its ITEM-TAGS for a table with COLUMNS."
+(defun org-tagged--row-for (heading item-tags columns truncation-string)
+  "Create a row for a HEADING with ITEM-TAGS.
+The table is specified by COLUMNS.  Headings are truncated if the
+format specifies it by TRUNCATION-STRING."
   (let ((result  (format "|%s|" (s-join "|"
     (--map
       (if (-elem-index (nth 1 it) item-tags)
-        (s-truncate (nth 0 it) heading)
+        (s-truncate (nth 0 it) heading truncation-string)
         "")
       columns)))))
     (if (eq (length result) (1+ (length columns))) nil result)))
@@ -72,16 +74,17 @@ The columns are separated by `|'."
   (--map (org-tagged--parse-column it) (s-split "|" columns-description)))
 
 
-(defun org-tagged--calculate-preview (columns match)
-  "Calculate the org-tagged header for COLUMNS and MATCH."
+(defun org-tagged--calculate-preview (columns match truncation-string)
+  "Calculate the org-tagged header for COLUMNS, MATCH and TRUNCATION-STRING."
   (s-join " " (delq nil
                 (list "#+BEGIN: tagged"
                   (format ":columns \"%s\"" columns)
-                  (if match (format ":match \"%s\"" match) nil)))))
+                  (if match (format ":match \"%s\"" match) nil)
+                  (format ":truncation-string \"%s\"" truncation-string)))))
 
-(defun org-tagged--update-preview (preview columns match)
-  "Update the PREVIEW widget with the org-tagged header for COLUMNS and MATCH."
-  (widget-value-set preview (org-tagged--calculate-preview columns match)))
+(defun org-tagged--update-preview (preview columns match truncation-string)
+  "Update the PREVIEW widget with the org-tagged header for COLUMNS, MATCH and TRUNCATION-STRING."
+  (widget-value-set preview (org-tagged--calculate-preview columns match truncation-string)))
 
 (defun org-tagged--show-configure-buffer (buffer beginning parameters)
   "Create the configuration form for BUFFER.
@@ -93,7 +96,10 @@ PARAMETERS the org-tagged parameters."
          (columns (plist-get parameters :columns))
          (columns-widget nil)
          (match (plist-get parameters :match))
-         (match-widget nil))
+         (match-widget nil)
+         (truncation-string (or (plist-get parameters :truncation-string) "…"))
+         (truncation-string-widget nil)
+       )
     (erase-buffer)
     (remove-overlays)
 
@@ -103,7 +109,7 @@ PARAMETERS the org-tagged parameters."
                          :size 40
                          :notify (lambda (widget &rest _ignore)
                                    (setq columns (widget-value widget))
-                                   (org-tagged--update-preview preview columns match))))
+                                   (org-tagged--update-preview preview columns match truncation-string))))
     (widget-insert "\n")
     (widget-insert (propertize "  select columns in the format [%LENGTH]TAG[(TITLE)]|..." 'face 'font-lock-doc-face))
     (widget-insert "\n\n")
@@ -114,11 +120,23 @@ PARAMETERS the org-tagged parameters."
                          :size 40
                          :notify (lambda (widget &rest _ignore)
                                    (setq match (widget-value widget))
-                                   (org-tagged--update-preview preview columns match))))
+                                   (org-tagged--update-preview preview columns match truncation-string))))
     (widget-insert "\n")
     (widget-insert (propertize "  match to tags e.g. urgent|important" 'face 'font-lock-doc-face))
+    (widget-insert "\n\n")
+
+    (widget-insert (propertize "Truncation string: " 'face 'font-lock-keyword-face))
+    (setq match-widget (widget-create 'editable-field
+                         :value (format "%s" truncation-string)
+                         :size 10
+                         :notify (lambda (widget &rest _ignore)
+                                   (setq truncation-string (widget-value widget))
+                                   (org-tagged--update-preview preview columns match truncation-string))))
+    (widget-insert "\n")
+    (widget-insert (propertize "  string truncation indicator" 'face 'font-lock-doc-face))
 
     (widget-insert "\n\n")
+
 
     (widget-insert (propertize "Result: " 'face 'font-lock-keyword-face))
     (setq preview
@@ -129,7 +147,7 @@ PARAMETERS the org-tagged parameters."
                 (with-current-buffer buffer
                   (goto-char beginning)
                   (kill-line)
-                  (insert (org-tagged--calculate-preview columns match)))
+                  (insert (org-tagged--calculate-preview columns match truncation-string)))
                 (kill-buffer)
                 (org-ctrl-c-ctrl-c))
       (propertize "Apply" 'face 'font-lock-comment-face))
@@ -139,7 +157,7 @@ PARAMETERS the org-tagged parameters."
                 (kill-buffer))
       (propertize "Cancel" 'face 'font-lock-string-face))
 
-    (org-tagged--update-preview preview columns match)
+    (org-tagged--update-preview preview columns match truncation-string)
     (use-local-map widget-keymap)
     (widget-setup)))
 
@@ -151,12 +169,13 @@ PARAMS must contain: `:tags`."
   (insert
     (let*
       (
+        (truncation-string (or (plist-get params :truncation-string) "…"))
         (columns
           (org-tagged--get-columns (plist-get params :columns)))
         (todos
           (org-map-entries 'org-tagged--get-data-from-heading (plist-get params :match)))
         (table
-          (s-join "\n" (remove nil (--map (org-tagged--row-for (nth 0 it) (nth 1 it) columns) todos)))))
+          (s-join "\n" (remove nil (--map (org-tagged--row-for (nth 0 it) (nth 1 it) columns truncation-string) todos)))))
       (format "|%s|\n|--|\n%s" (s-join "|" (--map (nth 2 it) columns)) table)))
   (org-table-align))
 
@@ -164,7 +183,7 @@ PARAMS must contain: `:tags`."
   "Create an org-tagged dynamic block at the point."
   (interactive)
   (save-excursion
-    (insert "#+BEGIN: tagged :columns \"%25tag1(Title)|tag2\" :match \"kanban\"\n#+END:\n"))
+    (insert "#+BEGIN: tagged :columns \"%25tag1(Title)|tag2\" :match \"kanban\" :truncation-string \" >\"\n#+END:\n"))
   (org-ctrl-c-ctrl-c))
 
 (defun org-tagged-configure-block ()
