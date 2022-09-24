@@ -30,7 +30,7 @@ Return a list with
 - the tags as list of strings."
   (list
     (nth 4 (org-heading-components))
-    (remove "" (s-split ":" (nth 5 (org-heading-components))))))
+    (remove "" (s-split ":" (or (nth 5 (org-heading-components)) "")))))
 
 (defun org-tagged--row-for (heading item-tags columns)
   "Create a row for a HEADING and its ITEM-TAGS for a table with COLUMNS."
