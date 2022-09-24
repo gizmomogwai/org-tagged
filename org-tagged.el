@@ -6,7 +6,7 @@
 ;; Author: Christian Köstlin <christian.koestlin@gmail.com>
 ;; Keywords: org-mode, org, gtd, tools
 ;; Package-Requires: ((s "1.13.0") (dash "2.19.1") (emacs "28.1") (org "9.5.2"))
-;; Package-Version: 0.0.3
+;; Package-Version: 0.0.4
 ;; Homepage: http://github.com/gizmomogwai/org-tagged
 
 ;;; Commentary:
@@ -45,7 +45,7 @@ Return a list with
 (defun org-tagged-version ()
   "Print org-tagge version."
   (interactive)
-  (message "org-tagged 0.0.3"))
+  (message "org-tagged 0.0.4"))
 
 (defun org-tagged--parse-column (column-description)
   "Parse a column from a COLUMN-DESCRIPTION.
