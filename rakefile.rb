@@ -16,7 +16,9 @@ task :prepare do
 end
 
 desc 'test'
-task :test => [:prepare] do
+task :test => [
+       #:prepare
+     ] do
   melpa_version = get_match("org-tagged.el", Regexp.new('Package-Version: (.*)'))
   elisp_version = get_match("org-tagged.el", Regexp.new('\\(message "org-tagged (.*)"\\)\\)'))
   cask_version = get_match("Cask", Regexp.new('\\(package "org-tagged" "(.*)" "Table with tagged todos for org-mode."\\)'))
@@ -32,6 +34,8 @@ task :test => [:prepare] do
   end
 
   sh "podman run --rm -it #{image_tag} exec ecukes --verbose --debug --reporter magnars"
+  sh "podman run --rm -it #{image_tag} eval '(byte-compile-file \"org-tagged.el\")'"
+  sh "podman run --rm -it #{image_tag} eval '(progn (find-file \"org-tagged.el\")(checkdoc))'"
 end
 
 desc "Push to github"
