@@ -9,6 +9,7 @@
 (depends-on "s")
 (development
  (depends-on "ert-runner")
+ (depends-on "package-lint")
  (depends-on "cask")
  (depends-on "undercover")
  (depends-on "ert-expectations")

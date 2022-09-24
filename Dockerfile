@@ -6,7 +6,7 @@ WORKDIR /root
 COPY Cask /root/
 COPY org-tagged.el /root/
 ENV PATH=/root/.cask/bin:$PATH
-RUN cask
+RUN cask install
 ENTRYPOINT ["cask"]
 COPY features /root/features/
 CMD ["emacs"]
