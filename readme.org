@@ -28,6 +28,10 @@ parameter:
   - LENGTH defaults to 1000 if not specified
   - TITLE defaults to TAG if not specified
 
+*** UI
+Use =org-tagged-configure-block= to open a small ui for interactive
+configuration of the block.
+
 ** Development
 You can easily run this package locally. Commits should be checked
 with =rake test= which in turn pulls up a container with the default

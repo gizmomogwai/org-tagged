@@ -71,6 +71,79 @@ Each column description consists of:
 The columns are separated by `|'."
   (--map (org-tagged--parse-column it) (s-split "|" columns-description)))
 
+
+(defun org-tagged--calculate-preview (columns match)
+  "Calculate the org-tagged header for COLUMNS and MATCH."
+  (s-join " " (delq nil
+                (list "#+BEGIN: tagged"
+                  (format ":columns \"%s\"" columns)
+                  (if match (format ":match \"%s\"" match) nil)))))
+
+(defun org-tagged--update-preview (preview columns match)
+  "Update the PREVIEW widget with the org-tagged header for COLUMNS and MATCH."
+  (widget-value-set preview (org-tagged--calculate-preview columns match)))
+
+(defun org-tagged--show-configure-buffer (buffer beginning parameters)
+  "Create the configuration form for BUFFER.
+BEGINNING the position there and
+PARAMETERS the org-tagged parameters."
+  (switch-to-buffer "*org-tagged-configure*")
+  (let (
+         (inhibit-read-only t)
+         (columns (plist-get parameters :columns))
+         (columns-widget nil)
+         (match (plist-get parameters :match))
+         (match-widget nil))
+    (erase-buffer)
+    (remove-overlays)
+
+    (widget-insert (propertize "Columns: " 'face 'font-lock-keyword-face))
+    (setq match-widget (widget-create 'editable-field
+                         :value (format "%s" (or columns ""))
+                         :size 40
+                         :notify (lambda (widget &rest _ignore)
+                                   (setq columns (widget-value widget))
+                                   (org-tagged--update-preview preview columns match))))
+    (widget-insert "\n")
+    (widget-insert (propertize "  select columns in the format [%LENGTH]TAG[(TITLE)]|..." 'face 'font-lock-doc-face))
+    (widget-insert "\n\n")
+
+    (widget-insert (propertize "Match: " 'face 'font-lock-keyword-face))
+    (setq match-widget (widget-create 'editable-field
+                         :value (format "%s" (or match ""))
+                         :size 40
+                         :notify (lambda (widget &rest _ignore)
+                                   (setq match (widget-value widget))
+                                   (org-tagged--update-preview preview columns match))))
+    (widget-insert "\n")
+    (widget-insert (propertize "  match to tags e.g. urgent|important" 'face 'font-lock-doc-face))
+
+    (widget-insert "\n\n")
+
+    (widget-insert (propertize "Result: " 'face 'font-lock-keyword-face))
+    (setq preview
+      (widget-create 'const))
+
+    (widget-create 'push-button
+      :notify (lambda(_widget &rest _ignore)
+                (with-current-buffer buffer
+                  (goto-char beginning)
+                  (kill-line)
+                  (insert (org-tagged--calculate-preview columns match)))
+                (kill-buffer)
+                (org-ctrl-c-ctrl-c))
+      (propertize "Apply" 'face 'font-lock-comment-face))
+    (widget-insert " ")
+    (widget-create 'push-button
+      :notify (lambda (_widget &rest _ignore)
+                (kill-buffer))
+      (propertize "Cancel" 'face 'font-lock-string-face))
+
+    (org-tagged--update-preview preview columns match)
+    (use-local-map widget-keymap)
+    (widget-setup)))
+
+
 ;;;###autoload
 (defun org-dblock-write:tagged (params)
   "Create a tagged dynamic block.
@@ -93,6 +166,15 @@ PARAMS must contain: `:tags`."
   (save-excursion
     (insert "#+BEGIN: tagged :columns \"%25tag1(Title)|tag2\" :match \"kanban\"\n#+END:\n"))
   (org-ctrl-c-ctrl-c))
+
+(defun org-tagged-configure-block ()
+  "Configure the current org-tagged dynamic block."
+  (interactive)
+  (let* (
+          (beginning (org-beginning-of-dblock))
+          (parameters (org-prepare-dblock)))
+    (org-tagged--show-configure-buffer (current-buffer) beginning parameters)))
+
 
 (provide 'org-tagged)
 ;;; org-tagged.el ends here
