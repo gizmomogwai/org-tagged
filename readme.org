@@ -15,6 +15,9 @@ To create a tagged table for an org file, simply put the dynamic block
 #+END:
 #+END_SRC
 somewhere and run `C-c C-c' on it.
+Alternative you can just run =org-tagged-initialize= which creates a
+table similar to the former for you (please adjust the columns and
+match expressions to your liking).
 
 *** Columns format
 The columns of the generated table are specified in the =:columns=

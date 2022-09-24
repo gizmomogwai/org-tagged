@@ -86,6 +86,14 @@ PARAMS must contain: `:tags`."
           (s-join "\n" (remove nil (--map (org-tagged--row-for (nth 0 it) (nth 1 it) columns) todos)))))
       (format "|%s|\n|--|\n%s" (s-join "|" (--map (nth 2 it) columns)) table)))
   (org-table-align))
+
+(defun org-tagged-initialize ()
+  "Create an org-tagged dynamic block at the point."
+  (interactive)
+  (save-excursion
+    (insert "#+BEGIN: tagged :columns \"%25tag1(Title)|tag2\" :match \"kanban\"\n#+END:\n"))
+  (org-ctrl-c-ctrl-c))
+
 (provide 'org-tagged)
 ;;; org-tagged.el ends here
 
