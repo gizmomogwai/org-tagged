@@ -42,7 +42,9 @@ task :test => [
     raise "versions inconsistent".red
   end
 
-  puts "Running tests".bold
+  puts "Running unit tests".bold
+  sh "podman run --rm -it #{image_tag} exec ert-runner -L features -L . features/*-ert.el"
+  puts "Running integration tests".bold
   sh "podman run --rm -it #{image_tag} exec ecukes --verbose --debug --reporter magnars"
   puts "Running byte-compile".bold
   sh "podman run --rm -it #{image_tag} eval '(byte-compile-file \"org-tagged.el\")'"
@@ -50,7 +52,6 @@ task :test => [
   sh "podman run --rm -it #{image_tag} eval '(progn (find-file \"org-tagged.el\")(checkdoc))'"
   puts "Running package-lint".bold
   sh "podman run --rm -it #{image_tag} eval \"(progn (find-file \\\"org-tagged.el\\\")(require 'package-lint)(package-lint-current-buffer)(message (with-current-buffer \\\"*Package-Lint*\\\" (buffer-string))))\""
-  sh "podman run --rm -it #{image_tag} exec ert-runner -L features -L . features/*-ert.el"
 end
 
 desc "Push to github"

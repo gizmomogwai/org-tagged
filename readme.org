@@ -16,6 +16,15 @@ To create a tagged table for an org file, simply put the dynamic block
 #+END_SRC
 somewhere and run `C-c C-c' on it.
 
+*** Columns format
+The columns of the generated table are specified in the =:columns=
+parameter:
+- Columns are separated by =|=
+- Each column follows the format =[%KLENGTH]TAG[(TITLE)]=
+  - Only TAG is required
+  - LENGTH defaults to 1000 if not specified
+  - TITLE defaults to TAG if not specified
+
 ** Development
 You can easily run this package locally. Commits should be checked
 with =rake test= which in turn pulls up a container with the default
