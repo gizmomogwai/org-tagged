@@ -50,6 +50,7 @@ task :test => [
   sh "podman run --rm -it #{image_tag} eval '(progn (find-file \"org-tagged.el\")(checkdoc))'"
   puts "Running package-lint".bold
   sh "podman run --rm -it #{image_tag} eval \"(progn (find-file \\\"org-tagged.el\\\")(require 'package-lint)(package-lint-current-buffer)(message (with-current-buffer \\\"*Package-Lint*\\\" (buffer-string))))\""
+  sh "podman run --rm -it #{image_tag} exec ert-runner -L features -L . features/*-ert.el"
 end
 
 desc "Push to github"

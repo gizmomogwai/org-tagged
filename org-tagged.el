@@ -66,17 +66,10 @@ Each column description consists of:
     (match-string 2 column-description)
     (or (match-string 3 column-description) (match-string 2 column-description))))
 
-;(org-tagged--parse-column "%25tag1(Column1)")
-;(org-tagged--parse-column "tag1(ttt)")
-;(org-tagged--parse-column "tag1")
-;(org-tagged--parse-column "%25tag1")
-
 (defun org-tagged--get-columns (columns-description)
   "Parse the column descriptions out of COLUMNS-DESCRIPTION.
 The columns are separated by `|'."
   (--map (org-tagged--parse-column it) (s-split "|" columns-description)))
-
-;(org-tagged--get-columns "%25tag1(Column1)|tag2|tag3")
 
 ;;;###autoload
 (defun org-dblock-write:tagged (params)
