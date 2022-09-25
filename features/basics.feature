@@ -1,17 +1,29 @@
 Feature: Basics
-  Background:
-    Given I open file "features/data/test1.org"
+  Scenario: Table without tag inheritance
+    Given I open file "features/data/test-without-tag-inheritance.org"
     When I place the cursor before "BEGIN: tagged"
     And I press "C-c C-c"
-
-  Scenario: Basic table
     Then I should see:
       """
-      #+BEGIN: tagged :columns "%9tag1(Col1)|%5tag1|tag1(Col1)|%5tag2" :match "kanban"
       | Col1      | tag1  | Col1                 | tag2  |
       |-----------+-------+----------------------+-------|
-      | 123456... | 12... | 12345678901234567890 | 12... |
-      |           |       |                      | to... |
-      | Issue ... | Is... | Issue 6 subtask      |       |
-      #+END:
+      | 12345678… | 1234… | 12345678901234567890 | 1234… |
+      |           |       |                      | todo… |
+      | Issue 6 … | Issu… | Issue 6 subtask      |       |
+      | Tree      | Tree  | Tree                 |       |
+      """
+
+  Scenario: Table with tag inheritance
+    Given I open file "features/data/test-with-tag-inheritance.org"
+    When I place the cursor before "BEGIN: tagged"
+    And I press "C-c C-c"
+    Then I should see:
+      """
+      | Col1      | tag1  | Col1                 | tag2  |
+      |-----------+-------+----------------------+-------|
+      | 12345678… | 1234… | 12345678901234567890 | 1234… |
+      |           |       |                      | todo… |
+      | Issue 6 … | Issu… | Issue 6 subtask      |       |
+      | Tree      | Tree  | Tree                 |       |
+      | Subtree   | Subt… | Subtree              |       |
       """

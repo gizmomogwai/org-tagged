@@ -25,6 +25,10 @@ task :prepare do
   sh "podman build --tag #{image_tag} ."
 end
 
+def run_on_project_folder
+  "podman run --rm -it -v#{Dir.pwd}/features:/root/features #{image_tag}"
+end
+
 desc 'test'
 task :test => [
        #:prepare
@@ -43,15 +47,15 @@ task :test => [
   end
 
   puts "Running unit tests".bold
-  sh "podman run --rm -it #{image_tag} exec ert-runner -L features -L . features/*-ert.el"
+  sh "#{run_on_project_folder} exec ert-runner -L features -L . features/*-ert.el"
   puts "Running integration tests".bold
-  sh "podman run --rm -it #{image_tag} exec ecukes --verbose --debug --reporter magnars"
+  sh "#{run_on_project_folder} exec ecukes --verbose --debug --reporter magnars"
   puts "Running byte-compile".bold
-  sh "podman run --rm -it #{image_tag} eval '(byte-compile-file \"org-tagged.el\")'"
+  sh "#{run_on_project_folder} eval '(byte-compile-file \"org-tagged.el\")'"
   puts "Running checkdoc".bold
-  sh "podman run --rm -it #{image_tag} eval '(progn (find-file \"org-tagged.el\")(checkdoc))'"
+  sh "#{run_on_project_folder} eval '(progn (find-file \"org-tagged.el\")(checkdoc))'"
   puts "Running package-lint".bold
-  sh "podman run --rm -it #{image_tag} eval \"(progn (find-file \\\"org-tagged.el\\\")(require 'package-lint)(package-lint-current-buffer)(message (with-current-buffer \\\"*Package-Lint*\\\" (buffer-string))))\""
+  sh "#{run_on_project_folder} eval \"(progn (find-file \\\"org-tagged.el\\\")(require 'package-lint)(package-lint-current-buffer)(message (with-current-buffer \\\"*Package-Lint*\\\" (buffer-string))))\""
 end
 
 desc "Push to github"

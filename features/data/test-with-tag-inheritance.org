@@ -1,0 +1,16 @@
+* TODO 12345678901234567890                                :tag1:tag2:kanban:
+* TODO todo2_2                                                  :tag2:kanban:
+* DONE todo3_2                                                         :tag2:
+* DONE todo4_1                                                         :tag1:
+* TODO todo5_3                                                         :tag3:
+* DONE todo6_3                                                         :tag3:
+* should not produce a row
+
+* Issue 6                                                            :kanban:
+org-map-entries also selects the subtask if searching for kanban
+** Issue 6 subtask                                                     :tag1:
+
+* Tree                                                          :kanban:tag1:
+** Subtree
+#+BEGIN: tagged :columns "%9tag1(Col1)|%5tag1|tag1(Col1)|%5tag2" :match "kanban" :truncation-string "…" :inherit-tags t
+#+END:

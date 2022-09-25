@@ -10,5 +10,7 @@
 org-map-entries also selects the subtask if searching for kanban
 ** Issue 6 subtask                                                     :tag1:
 
-#+BEGIN: tagged :columns "%9tag1(Col1)|%5tag1|tag1(Col1)|%5tag2" :match "kanban"
+* Tree                                                          :kanban:tag1:
+** Subtree
+#+BEGIN: tagged :columns "%9tag1(Col1)|%5tag1|tag1(Col1)|%5tag2" :match "kanban" :truncation-string "…"
 #+END:
