@@ -2,6 +2,9 @@ class String
   def red
     "\e[31m#{self}\e[0m"
   end
+  def green
+    "\e[32m#{self}\e[0m"
+  end
 
   def bold
     "\e[1m#{self}\e[22m"
@@ -12,7 +15,7 @@ def get_match(file_name, regexp)
   content = File.read(file_name, encoding: "UTF-8")
   match = regexp.match(content)
   if !match
-    raise 'cannot match'
+    raise "cannot match to #{regexp}"
   end
   return match[1]
 end
@@ -33,8 +36,8 @@ desc 'test'
 task :test => [
        #:prepare
      ] do
-  puts "Checking version consistency".bold
-  melpa_version = get_match("org-tagged.el", Regexp.new('Package-Version: (.*)'))
+  puts "Checking version consistency".bold.green
+  melpa_version = get_match("org-tagged.el", Regexp.new('Version: (.*)'))
   elisp_version = get_match("org-tagged.el", Regexp.new('\\(message "org-tagged (.*)"\\)\\)'))
   cask_version = get_match("Cask", Regexp.new('\\(package "org-tagged" "(.*)" "Table with tagged todos for org-mode."\\)'))
   if melpa_version != elisp_version or
@@ -46,6 +49,10 @@ task :test => [
     raise "versions inconsistent".red
   end
 
+  puts "Emacs version".bold
+  sh "#{run_on_project_folder} eval \"(message emacs-version)\""
+  puts "org mode version".bold
+  sh "#{run_on_project_folder} eval \"(progn (require 'org)(message org-version))\""
   puts "Running unit tests".bold
   sh "#{run_on_project_folder} exec ert-runner -L features -L . features/*-ert.el"
   puts "Running integration tests".bold
@@ -56,6 +63,8 @@ task :test => [
   sh "#{run_on_project_folder} eval '(progn (find-file \"org-tagged.el\")(checkdoc))'"
   puts "Running package-lint".bold
   sh "#{run_on_project_folder} eval \"(progn (find-file \\\"org-tagged.el\\\")(require 'package-lint)(package-lint-current-buffer)(message (with-current-buffer \\\"*Package-Lint*\\\" (buffer-string))))\""
+  puts "Running melpazoid".bold
+  sh "#{run_on_project_folder} eval \"(progn (find-file \\\"org-tagged.el\\\")(require 'melpazoid)(melpazoid))\""
 end
 
 desc "Push to github"

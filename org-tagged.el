@@ -6,7 +6,7 @@
 ;; Author: Christian Köstlin <christian.koestlin@gmail.com>
 ;; Keywords: org-mode, org, gtd, tools
 ;; Package-Requires: ((s "1.13.0") (dash "2.19.1") (emacs "28.1") (org "9.5.2"))
-;; Package-Version: 0.0.4
+;; Version: 0.0.5
 ;; Homepage: http://github.com/gizmomogwai/org-tagged
 
 ;;; Commentary:
@@ -22,6 +22,7 @@
 (require 'dash)
 (require 'org)
 (require 'org-table)
+(require 'wid-edit)
 
 (defun org-tagged--get-data-from-heading (entry inherit-tags)
   "Extract the needed information from an ENTRY respecting INHERIT-TAGS.
@@ -49,7 +50,7 @@ format specifies it by TRUNCATION-STRING."
 (defun org-tagged-version ()
   "Print org-tagge version."
   (interactive)
-  (message "org-tagged 0.0.4"))
+  (message "org-tagged 0.0.5"))
 
 (defun org-tagged--parse-column (column-description)
   "Parse a column from a COLUMN-DESCRIPTION.
@@ -77,7 +78,8 @@ The columns are separated by `|'."
 
 
 (defun org-tagged--calculate-preview (columns match truncation-string inherit-tags)
-  "Calculate the org-tagged header for COLUMNS, MATCH, TRUNCATION-STRING and INHERIT-TAGS."
+  "Calculate the org-tagged header.
+Its calculated from COLUMNS, MATCH, TRUNCATION-STRING and INHERIT-TAGS."
   (s-join " " (delq nil
                 (list "#+BEGIN: tagged"
                   (format ":columns \"%s\"" columns)
@@ -86,7 +88,9 @@ The columns are separated by `|'."
                   (if inherit-tags (format ":inherit-tags t"))))))
 
 (defun org-tagged--update-preview (preview columns match truncation-string inherit-tags)
-  "Update the PREVIEW widget with the org-tagged header for COLUMNS, MATCH, TRUNCATION-STRING and INHERIT-TAGS."
+  "Update the PREVIEW widget.
+The header is calculated from COLUMNS, MATCH, TRUNCATION-STRING and
+INHERIT-TAGS."
   (widget-value-set preview
     (org-tagged--calculate-preview
       columns
@@ -100,61 +104,58 @@ BEGINNING the position there and
 PARAMETERS the org-tagged parameters."
   (switch-to-buffer "*org-tagged-configure*")
   (let* (
-         (inhibit-read-only t)
-         (columns (plist-get parameters :columns))
-         (columns-widget nil)
-         (match (plist-get parameters :match))
-         (match-widget nil)
-         (truncation-string (or (plist-get parameters :truncation-string) "…"))
-         (truncation-string-widget nil)
-         (inherit-tags (plist-get parameters :inherit-tags))
-         (inherit-tags-widget nil))
+          (inhibit-read-only t)
+          (preview nil)
+          (columns (plist-get parameters :columns))
+          (match (plist-get parameters :match))
+          (truncation-string (or (plist-get parameters :truncation-string) "…"))
+          (inherit-tags (plist-get parameters :inherit-tags)))
     (erase-buffer)
     (remove-overlays)
 
     (widget-insert (propertize "Columns: " 'face 'font-lock-keyword-face))
-    (setq match-widget (widget-create 'editable-field
-                         :value (format "%s" (or columns ""))
-                         :size 40
-                         :notify (lambda (widget &rest _ignore)
-                                   (setq columns (widget-value widget))
-                                   (org-tagged--update-preview
-                                     preview columns match truncation-string inherit-tags))))
+    (widget-create 'editable-field
+      :value (format "%s" (or columns ""))
+      :size 40
+      :notify (lambda (widget &rest _ignore)
+                (setq columns (widget-value widget))
+                (org-tagged--update-preview
+                  preview columns match truncation-string inherit-tags)))
     (widget-insert "\n")
     (widget-insert (propertize "  select columns in the format [%LENGTH]TAG[(TITLE)]|..." 'face 'font-lock-doc-face))
     (widget-insert "\n\n")
 
     (widget-insert (propertize "Match: " 'face 'font-lock-keyword-face))
-    (setq match-widget (widget-create 'editable-field
-                         :value (format "%s" (or match ""))
-                         :size 40
-                         :notify (lambda (widget &rest _ignore)
-                                   (setq match (widget-value widget))
-                                   (org-tagged--update-preview preview
-                                     columns match truncation-string inherit-tags))))
+    (widget-create 'editable-field
+      :value (format "%s" (or match ""))
+      :size 40
+      :notify (lambda (widget &rest _ignore)
+                (setq match (widget-value widget))
+                (org-tagged--update-preview preview
+                  columns match truncation-string inherit-tags)))
     (widget-insert "\n")
     (widget-insert (propertize "  match to tags e.g. urgent|important" 'face 'font-lock-doc-face))
     (widget-insert "\n\n")
 
     (widget-insert (propertize "Truncation string: " 'face 'font-lock-keyword-face))
-    (setq match-widget (widget-create 'editable-field
-                         :value (format "%s" truncation-string)
-                         :size 10
-                         :notify (lambda (widget &rest _ignore)
-                                   (setq truncation-string (widget-value widget))
-                                   (org-tagged--update-preview
-                                     preview columns match truncation-string inherit-tags))))
+    (widget-create 'editable-field
+      :value (format "%s" truncation-string)
+      :size 10
+      :notify (lambda (widget &rest _ignore)
+                (setq truncation-string (widget-value widget))
+                (org-tagged--update-preview
+                  preview columns match truncation-string inherit-tags)))
     (widget-insert "\n")
     (widget-insert (propertize "  string truncation indicator" 'face 'font-lock-doc-face))
     (widget-insert "\n\n")
 
     (widget-insert (propertize "Inherit tags: " 'face 'font-lock-keyword-face))
-    (setq mirror-widget (widget-create 'toggle
-                          :value inherit-tags
-                          :notify (lambda (widget &rest _ignore)
-                                    (setq inherit-tags (widget-value widget))
-                                    (org-tagged--update-preview
-                                      preview columns match truncation-string inherit-tags))))
+    (widget-create 'toggle
+      :value inherit-tags
+      :notify (lambda (widget &rest _ignore)
+                (setq inherit-tags (widget-value widget))
+                (org-tagged--update-preview
+                  preview columns match truncation-string inherit-tags)))
     (widget-insert (propertize "  inherit tags" 'face 'font-lock-doc-face))
     (widget-insert "\n\n")
 
