@@ -6,7 +6,7 @@
 ;; Author: Christian Köstlin <christian.koestlin@gmail.com>
 ;; Keywords: org-mode, org, gtd, tools
 ;; Package-Requires: ((s "1.13.0") (dash "2.19.1") (emacs "28.1") (org "9.5.2"))
-;; Version: 0.0.5
+;; Version: 0.0.6
 ;; Homepage: http://github.com/gizmomogwai/org-tagged
 
 ;;; Commentary:
@@ -24,16 +24,14 @@
 (require 'org-table)
 (require 'wid-edit)
 
-(defun org-tagged--get-data-from-heading (entry inherit-tags)
-  "Extract the needed information from an ENTRY respecting INHERIT-TAGS.
+(defun org-tagged--get-data-from-heading (entry)
+  "Extract the needed information from an ENTRY.
 Return a list with
 - the heading
 - the tags as list of strings."
   (list
     (nth 4 entry)
-    (if inherit-tags
-      org-scanner-tags
-      (remove "" (s-split ":" (or (nth 5 entry) ""))))))
+    org-scanner-tags))
 
 (defun org-tagged--row-for (heading item-tags columns truncation-string)
   "Create a row for a HEADING with ITEM-TAGS.
@@ -50,7 +48,7 @@ format specifies it by TRUNCATION-STRING."
 (defun org-tagged-version ()
   "Print org-tagge version."
   (interactive)
-  (message "org-tagged 0.0.5"))
+  (message "org-tagged 0.0.6"))
 
 (defun org-tagged--parse-column (column-description)
   "Parse a column from a COLUMN-DESCRIPTION.
@@ -77,26 +75,23 @@ The columns are separated by `|'."
   (--map (org-tagged--parse-column it) (s-split "|" columns-description)))
 
 
-(defun org-tagged--calculate-preview (columns match truncation-string inherit-tags)
+(defun org-tagged--calculate-preview (columns match truncation-string)
   "Calculate the org-tagged header.
-Its calculated from COLUMNS, MATCH, TRUNCATION-STRING and INHERIT-TAGS."
+Its calculated from COLUMNS, MATCH and TRUNCATION-STRING."
   (s-join " " (delq nil
                 (list "#+BEGIN: tagged"
                   (format ":columns \"%s\"" columns)
                   (if match (format ":match \"%s\"" match) nil)
-                  (format ":truncation-string \"%s\"" truncation-string)
-                  (if inherit-tags (format ":inherit-tags t"))))))
+                  (format ":truncation-string \"%s\"" truncation-string)))))
 
-(defun org-tagged--update-preview (preview columns match truncation-string inherit-tags)
+(defun org-tagged--update-preview (preview columns match truncation-string)
   "Update the PREVIEW widget.
-The header is calculated from COLUMNS, MATCH, TRUNCATION-STRING and
-INHERIT-TAGS."
+The header is calculated from COLUMNS, MATCH and TRUNCATION-STRING."
   (widget-value-set preview
     (org-tagged--calculate-preview
       columns
       match
-      truncation-string
-      inherit-tags)))
+      truncation-string)))
 
 (defun org-tagged--show-configure-buffer (buffer beginning parameters)
   "Create the configuration form for BUFFER.
@@ -108,8 +103,7 @@ PARAMETERS the org-tagged parameters."
           (preview nil)
           (columns (plist-get parameters :columns))
           (match (plist-get parameters :match))
-          (truncation-string (or (plist-get parameters :truncation-string) "…"))
-          (inherit-tags (plist-get parameters :inherit-tags)))
+          (truncation-string (or (plist-get parameters :truncation-string) "…")))
     (erase-buffer)
     (remove-overlays)
 
@@ -120,7 +114,7 @@ PARAMETERS the org-tagged parameters."
       :notify (lambda (widget &rest _ignore)
                 (setq columns (widget-value widget))
                 (org-tagged--update-preview
-                  preview columns match truncation-string inherit-tags)))
+                  preview columns match truncation-string)))
     (widget-insert "\n")
     (widget-insert (propertize "  select columns in the format [%LENGTH]TAG[(TITLE)]|..." 'face 'font-lock-doc-face))
     (widget-insert "\n\n")
@@ -132,7 +126,7 @@ PARAMETERS the org-tagged parameters."
       :notify (lambda (widget &rest _ignore)
                 (setq match (widget-value widget))
                 (org-tagged--update-preview preview
-                  columns match truncation-string inherit-tags)))
+                  columns match truncation-string)))
     (widget-insert "\n")
     (widget-insert (propertize "  match to tags e.g. urgent|important" 'face 'font-lock-doc-face))
     (widget-insert "\n\n")
@@ -144,19 +138,9 @@ PARAMETERS the org-tagged parameters."
       :notify (lambda (widget &rest _ignore)
                 (setq truncation-string (widget-value widget))
                 (org-tagged--update-preview
-                  preview columns match truncation-string inherit-tags)))
+                  preview columns match truncation-string)))
     (widget-insert "\n")
     (widget-insert (propertize "  string truncation indicator" 'face 'font-lock-doc-face))
-    (widget-insert "\n\n")
-
-    (widget-insert (propertize "Inherit tags: " 'face 'font-lock-keyword-face))
-    (widget-create 'toggle
-      :value inherit-tags
-      :notify (lambda (widget &rest _ignore)
-                (setq inherit-tags (widget-value widget))
-                (org-tagged--update-preview
-                  preview columns match truncation-string inherit-tags)))
-    (widget-insert (propertize "  inherit tags" 'face 'font-lock-doc-face))
     (widget-insert "\n\n")
 
     (widget-insert (propertize "Result: " 'face 'font-lock-keyword-face))
@@ -168,7 +152,7 @@ PARAMETERS the org-tagged parameters."
                 (with-current-buffer buffer
                   (goto-char beginning)
                   (kill-line)
-                  (insert (org-tagged--calculate-preview columns match truncation-string inherit-tags)))
+                  (insert (org-tagged--calculate-preview columns match truncation-string)))
                 (kill-buffer)
                 (org-ctrl-c-ctrl-c))
       (propertize "Apply" 'face 'font-lock-comment-face))
@@ -178,7 +162,7 @@ PARAMETERS the org-tagged parameters."
                 (kill-buffer))
       (propertize "Cancel" 'face 'font-lock-string-face))
 
-    (org-tagged--update-preview preview columns match truncation-string inherit-tags)
+    (org-tagged--update-preview preview columns match truncation-string)
     (use-local-map widget-keymap)
     (widget-setup)))
 
@@ -191,12 +175,11 @@ PARAMS must contain: `:tags`."
     (let*
       (
         (truncation-string (or (plist-get params :truncation-string) "…"))
-        (inherit-tags (plist-get params :inherit-tags))
         (columns
           (org-tagged--get-columns (plist-get params :columns)))
         (todos
           (org-map-entries
-            (lambda () (org-tagged--get-data-from-heading (org-heading-components) inherit-tags)) (plist-get params :match)))
+            (lambda () (org-tagged--get-data-from-heading (org-heading-components))) (plist-get params :match)))
         (table
           (s-join "\n" (remove nil (--map (org-tagged--row-for (nth 0 it) (nth 1 it) columns truncation-string) todos)))))
       (format "|%s|\n|--|\n%s" (s-join "|" (--map (nth 2 it) columns)) table)))

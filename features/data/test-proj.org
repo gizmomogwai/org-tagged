@@ -1,0 +1,6 @@
+* TODO project 1                                                  :proj:tag1:
+** TODO task in project 1                                              :tag1:
+
+* Table1
+#+BEGIN: tagged :columns "tag1" :match "proj&level<2" :truncation-string "…"
+#+END:
