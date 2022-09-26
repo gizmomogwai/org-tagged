@@ -38,10 +38,10 @@ Return a list with
   "Create a row for a HEADING with ITEM-TAGS.
 The table is specified by COLUMNS.  Headings are truncated if the
 format specifies it by TRUNCATION-STRING."
-  (let ((result  (format "|%s|" (s-join "|"
+  (let* ((result  (format "|%s|" (s-join "|"
     (--map
       (if (-elem-index (nth 1 it) item-tags)
-        (s-truncate (nth 0 it) heading truncation-string)
+        (format "[[*%s][%s]]" heading (s-truncate (nth 0 it) heading truncation-string))
         "")
       columns)))))
     (if (eq (length result) (1+ (length columns))) nil result)))

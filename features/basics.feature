@@ -7,11 +7,11 @@ Feature: Basics
       """
       | Col1      | tag1  | Col1                 | tag2  |
       |-----------+-------+----------------------+-------|
-      | 12345678… | 1234… | 12345678901234567890 | 1234… |
-      |           |       |                      | todo… |
-      | Issue 6 … | Issu… | Issue 6 subtask      |       |
-      | Tree      | Tree  | Tree                 |       |
-      | Subtree   | Subt… | Subtree              |       |
+      | [[*12345678901234567890][12345678…]] | [[*12345678901234567890][1234…]] | [[*12345678901234567890][12345678901234567890]] | [[*12345678901234567890][1234…]] |
+      |           |       |                      | [[*todo2_2][todo…]] |
+      | [[*Issue 6 subtask][Issue 6 …]] | [[*Issue 6 subtask][Issu…]] | [[*Issue 6 subtask][Issue 6 subtask]]      |       |
+      | [[*Tree][Tree]]      | [[*Tree][Tree]]  | [[*Tree][Tree]]                 |       |
+      | [[*Subtree][Subtree]]   | [[*Subtree][Subt…]] | [[*Subtree][Subtree]]              |       |
       """
 
   Scenario: Table with tag inheritance
@@ -22,5 +22,5 @@ Feature: Basics
       """
       | tag1      |
       |-----------|
-      | project 1 |
+      | [[*project 1][project 1]] |
       """
