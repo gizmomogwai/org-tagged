@@ -8,6 +8,7 @@
 ;; Package-Requires: ((s "1.13.0") (dash "2.19.1") (emacs "28.1") (org "9.5.2"))
 ;; Version: 0.0.6
 ;; Homepage: http://github.com/gizmomogwai/org-tagged
+;; SPDX-License-Identifier: MIT
 
 ;;; Commentary:
 ;; To create a tagged table for an org file, simply put the dynamic block
